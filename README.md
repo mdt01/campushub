@@ -49,6 +49,7 @@ app/
 scripts/seed.py      sample data
 tests/               pytest test suite
 frontend/            web interface (coming soon)
+labs/                code for the book's chapter labs (see labs/README.md)
 ```
 
 ## API overview
