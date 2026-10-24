@@ -1,0 +1,18 @@
+# Keep-CI-green loop for CampusHub (Chapter 16). Run one tick nightly:
+#   python -m minicode.loop run .agents/loops/keep-ci-green.toml --repo .
+name = "keep-ci-green"
+goal = "Every test file passes 20 times in a row (no failing or flaky tests)."
+check = "python .agents/loops/check_green.py"
+max_iterations = 3
+budget_tokens = 400000
+check_timeout = 900
+maker_prompt = """
+The test suite of CampusHub is not reliably green. The check output below names a test
+that failed. Find the root cause and fix it.
+- If the code is wrong, fix the code.
+- If the test is flaky (depends on time, order, randomness or speed), make the test
+  deterministic without weakening what it checks - for example, pass a fixed time in
+  instead of reading the real clock.
+- Run the failing test file several times to confirm the fix.
+Do not change unrelated files.
+"""
