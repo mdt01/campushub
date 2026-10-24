@@ -61,6 +61,8 @@ labs/                code for the book's chapter labs (see labs/README.md)
 labs/ch13/           seeded-bug branch patch for the review lab - Chapter 13
 .agents/permissions.json  allow/ask/deny rules for agents - Chapter 14
 labs/ch14/           scanner rules, security CI workflow, sandbox image, reference fix - Chapter 14
+.github/workflows/agent-on-label.yml  issue-to-PR background agent - Chapter 15
+.github/ISSUE_TEMPLATE/agent-task.md  template for agent-ready issues - Chapter 15
 mcp_server/          MCP server for agents (list, search, register) - Chapter 7
 ```
 

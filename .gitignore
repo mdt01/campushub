@@ -182,3 +182,6 @@ cython_debug/
 # MCP server environment (Chapter 7)
 .venv-mcp/
 .mcp.json
+
+# Agent task store, audit log and notes (Chapters 14-15)
+.minicode/
