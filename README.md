@@ -51,6 +51,7 @@ tests/               pytest test suite
 frontend/            web interface (coming soon)
 labs/                code for the book's chapter labs (see labs/README.md)
 .agents/commands/    RePPIT workflow prompts (research, propose, design, implement, review) - Chapter 6
+.agents/skills/      agent skills: verify-change, release-notes, grill-me - Chapter 9
 mcp_server/          MCP server for agents (list, search, register) - Chapter 7
 ```
 
