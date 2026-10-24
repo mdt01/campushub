@@ -50,6 +50,7 @@ scripts/seed.py      sample data
 tests/               pytest test suite
 frontend/            web interface (coming soon)
 labs/                code for the book's chapter labs (see labs/README.md)
+.agents/commands/    RePPIT workflow prompts (research, propose, design, implement, review) - Chapter 6
 ```
 
 ## API overview
