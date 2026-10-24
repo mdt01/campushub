@@ -185,3 +185,6 @@ cython_debug/
 
 # Agent task store, audit log and notes (Chapters 14-15)
 .minicode/
+
+# Local SQLite databases created by the app and tests (Chapter 18)
+*.db

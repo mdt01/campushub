@@ -1,0 +1,26 @@
+# Copy to specs/<name>.toml and fill in. Every field is read by minicode.factory.
+title = "One line: what changes for users"
+goal = """Two or three sentences: why, and what is true when this is done."""
+context = """Files, functions and endpoints involved; links to issues or decisions."""
+acceptance = [
+  "Checkable statement, ideally input -> expected output. Each needs a test.",
+]
+out_of_scope = [
+  "What must not change.",
+]
+verify = [
+  "{python} -m pytest -q -p no:cacheprovider",
+  "{python} .agents/checks/no_stray_files.py",
+]
+app = "app.main:app"                   # leave empty ("") to skip the preview
+health = "/health"
+env = { CAMPUSHUB_DB = "sqlite:///{tmp}/preview.db" }
+
+# Smoke checks run in order against the preview. Use {now+30m}, {now-2h}, {now+7d}
+# for times, and {name.field} to reuse a value from an earlier check's JSON response.
+[[smoke]]
+name = "club"
+method = "POST"
+path = "/clubs"
+json = { name = "Smoke Club" }
+expect_status = 201

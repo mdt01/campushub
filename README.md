@@ -65,6 +65,9 @@ labs/ch14/           scanner rules, security CI workflow, sandbox image, referen
 .github/ISSUE_TEMPLATE/agent-task.md  template for agent-ready issues - Chapter 15
 .agents/loops/        keep-ci-green goal loop and its check - Chapter 16
 labs/ch17/           LLM gateway configuration and AI-usage policy template - Chapter 17
+specs/               executable feature specs for the minicode factory - Chapter 18
+.agents/checks/      no_stray_files.py commit check - Chapter 18
+labs/ch18/           software-factory lab - Chapter 18
 mcp_server/          MCP server for agents (list, search, register) - Chapter 7
 ```
 

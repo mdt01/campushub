@@ -1,0 +1,69 @@
+# An executable specification for the software factory (Chapter 18).
+#   python -m minicode.factory run specs/registration-window.toml --repo .
+title = "Registration closes one hour before an event starts"
+goal = """Students can no longer register for an event in the last hour before it
+starts (or after it has started), so organisers have a final attendee list."""
+context = """Registration rules live in app/services/registration_service.py
+(register_student). The API endpoint is POST /events/{event_id}/register in
+app/routers/registrations.py, which turns RegistrationError into HTTP 400."""
+acceptance = [
+  "Registering 60 or more minutes before the start succeeds (tested at 120, 61 and 60 minutes).",
+  "Registering less than 60 minutes before the start fails with RegistrationError('Registration closed ...') (tested at 59, 1 and 0 minutes and after the start).",
+  "register_student accepts an optional `now` argument so tests never use the real clock.",
+  "Through the API, a late registration returns 400 with a detail containing 'Registration closed'.",
+]
+out_of_scope = [
+  "Changing capacity or duplicate rules.",
+  "Making the one-hour window configurable.",
+  "Any change outside app/services/ and tests/.",
+]
+verify = [
+  "{python} -m pytest -q -p no:cacheprovider",
+  "{python} .agents/checks/no_stray_files.py",
+]
+
+# Preview deploy and smoke checks (run against the real app on a throw-away database)
+app = "app.main:app"
+health = "/health"
+env = { CAMPUSHUB_DB = "sqlite:///{tmp}/preview.db" }
+
+[[smoke]]
+name = "club"
+method = "POST"
+path = "/clubs"
+json = { name = "Factory Club", description = "smoke test" }
+expect_status = 201
+
+[[smoke]]
+name = "late"
+method = "POST"
+path = "/events"
+json = { title = "Starts soon", venue = "Lab 1", starts_at = "{now+30m}", capacity = 10, club_id = "{club.id}" }
+expect_status = 201
+
+[[smoke]]
+name = "early"
+method = "POST"
+path = "/events"
+json = { title = "Next week", venue = "Lab 2", starts_at = "{now+7d}", capacity = 10, club_id = "{club.id}" }
+expect_status = 201
+
+[[smoke]]
+name = "student"
+method = "POST"
+path = "/students"
+json = { roll_no = "22CE999", name = "Smoke Test", email = "smoke@example.edu" }
+expect_status = 201
+
+[[smoke]]
+method = "POST"
+path = "/events/{late.id}/register"
+json = { student_id = "{student.id}" }
+expect_status = 400
+expect_contains = "Registration closed"
+
+[[smoke]]
+method = "POST"
+path = "/events/{early.id}/register"
+json = { student_id = "{student.id}" }
+expect_status = 201
