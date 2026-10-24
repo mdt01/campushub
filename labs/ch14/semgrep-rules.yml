@@ -1,0 +1,25 @@
+rules:
+  - id: campushub-sql-fstring
+    languages: [python]
+    severity: ERROR
+    message: >-
+      SQL built with an f-string and executed with text(): SQL injection.
+      Use the ORM or text() with bound parameters (:name).
+    pattern-either:
+      - patterns:
+          - pattern-inside: |
+              $SQL = f"..."
+              ...
+          - pattern: text($SQL)
+      - pattern: text(f"...")
+  - id: campushub-hardcoded-secret
+    languages: [python]
+    severity: ERROR
+    message: Secret-looking setting with a literal value. Read it from the environment.
+    patterns:
+      - pattern-either:
+          - pattern: $NAME = "..."
+          - pattern: $NAME = os.getenv("...", "...")
+      - metavariable-regex:
+          metavariable: $NAME
+          regex: (?i).*(secret|token|password|api_key).*

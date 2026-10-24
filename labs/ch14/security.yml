@@ -1,0 +1,25 @@
+# Copy to .github/workflows/security.yml AFTER you have fixed the findings in Lab 14:
+# from then on, any new injection pattern or hard-coded secret fails the pull request.
+name: Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install scanners
+        run: pip install bandit semgrep pip-audit
+      - name: SAST - Bandit
+        run: bandit -q -r app
+      - name: SAST - Semgrep with the team's rules
+        run: semgrep scan --metrics=off --error --config labs/ch14/semgrep-rules.yml app
+      - name: SCA - known vulnerable dependencies
+        run: pip-audit -r requirements.txt

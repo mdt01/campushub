@@ -59,6 +59,8 @@ labs/                code for the book's chapter labs (see labs/README.md)
 .agents/review-rules.md  team review rules for humans and AI reviewers - Chapter 13
 .github/workflows/ai-review.yml  advisory multi-agent PR review - Chapter 13
 labs/ch13/           seeded-bug branch patch for the review lab - Chapter 13
+.agents/permissions.json  allow/ask/deny rules for agents - Chapter 14
+labs/ch14/           scanner rules, security CI workflow, sandbox image, reference fix - Chapter 14
 mcp_server/          MCP server for agents (list, search, register) - Chapter 7
 ```
 

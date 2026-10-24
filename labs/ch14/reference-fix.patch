@@ -1,0 +1,57 @@
+diff --git a/.env.example b/.env.example
+new file mode 100644
+index 0000000..0090fd8
+--- /dev/null
++++ b/.env.example
+@@ -0,0 +1,4 @@
++# Copy to .env (never commit .env) and set real values.
++CAMPUSHUB_DB=sqlite:///./campushub.db
++CAMPUSHUB_SECRET_KEY=generate-with-python-c-import-secrets-print-secrets.token_urlsafe-32
++CAMPUSHUB_ADMIN_TOKEN=
+diff --git a/app/config.py b/app/config.py
+index 13e71cc..1ec2e4b 100644
+--- a/app/config.py
++++ b/app/config.py
+@@ -1,9 +1,12 @@
+ import os
++import secrets
+ 
+-# Settings for CampusHub.
++# Settings for CampusHub. Secrets come from the environment, never from the code.
+ DATABASE_URL = os.getenv("CAMPUSHUB_DB", "sqlite:///./campushub.db")
+ 
+-# Used to sign admin tokens.
+-SECRET_KEY = "campushub-dev-secret-9f2c7e"   # TODO: move to environment variable
++# Used to sign admin tokens. Without CAMPUSHUB_SECRET_KEY a random key is generated at
++# start-up: fine for development, and nothing secret is ever committed.
++SECRET_KEY = os.getenv("CAMPUSHUB_SECRET_KEY") or secrets.token_urlsafe(32)
+ 
+-ADMIN_TOKEN = os.getenv("CAMPUSHUB_ADMIN_TOKEN", "admin-token-123")
++# No default: admin features stay disabled unless a token is configured.
++ADMIN_TOKEN = os.getenv("CAMPUSHUB_ADMIN_TOKEN")
+diff --git a/app/routers/events.py b/app/routers/events.py
+index 61500ad..0f7d3a5 100644
+--- a/app/routers/events.py
++++ b/app/routers/events.py
+@@ -1,5 +1,4 @@
+ from fastapi import APIRouter, Depends, HTTPException
+-from sqlalchemy import text
+ from sqlalchemy.orm import Session
+ 
+ from app import models, schemas
+@@ -25,10 +24,11 @@ def list_events(upcoming_only: bool = False, db: Session = Depends(get_db)):
+ 
+ @router.get("/search", response_model=list[schemas.EventOut])
+ def search_events(q: str, db: Session = Depends(get_db)):
+-    # quick keyword search over titles
+-    sql = f"SELECT id FROM events WHERE title LIKE '%{q}%' ORDER BY starts_at"
+-    ids = [row[0] for row in db.execute(text(sql))]
+-    return [_to_out(db.get(models.Event, i)) for i in ids]
++    # keyword search over titles; the ORM sends q as a bound parameter, never as SQL
++    events = (db.query(models.Event)
++              .filter(models.Event.title.contains(q))
++              .order_by(models.Event.starts_at).all())
++    return [_to_out(e) for e in events]
+ 
+ 
+ @router.post("", response_model=schemas.EventOut, status_code=201)
