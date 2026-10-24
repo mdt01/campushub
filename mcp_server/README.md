@@ -45,3 +45,9 @@ Set `CAMPUSHUB_URL` if the API is not at `http://127.0.0.1:8000`.
 ```
 
 On Windows use `.venv-mcp\\Scripts\\python.exe` as the command.
+
+## Chapter 8 files
+
+- `naive_server.py` - a deliberately poor 15-tool server (endpoint mirroring) for Lab 8. Do not copy its style.
+- `measure_tools.py` - prints how many tokens each server's tool definitions add to every request:
+  `python mcp_server/measure_tools.py`
