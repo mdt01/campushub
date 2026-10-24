@@ -53,7 +53,8 @@ labs/                code for the book's chapter labs (see labs/README.md)
 .agents/commands/    RePPIT workflow prompts (research, propose, design, implement, review) - Chapter 6
 .agents/commands/readiness-audit.md  agent-readiness audit - Chapter 11
 .agents/skills/      agent skills: verify-change, release-notes, grill-me - Chapter 9
-.agents/hooks.json   hooks (guard, post-edit check, stop-time test gate) - Chapter 10
+.agents/hooks.json   hooks (guard, post-edit check, stop-time test gate) - Chapter 10;
+                     test guard against deleted or weakened tests - Chapter 12
 .agents/agents/      subagents: explorer, planner, reviewer - Chapter 10
 mcp_server/          MCP server for agents (list, search, register) - Chapter 7
 ```

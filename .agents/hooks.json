@@ -6,6 +6,7 @@
     {"match": "edit_file", "command": "python .agents/hooks/check_edit.py"}
   ],
   "stop": [
+    {"command": "python .agents/hooks/test_guard.py"},
     {"command": "python .agents/hooks/test_gate.py", "timeout": 300}
   ]
 }
