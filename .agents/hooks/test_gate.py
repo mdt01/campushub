@@ -18,7 +18,7 @@ if run.returncode != 0:
     rerun = subprocess.run([python, "-m", "pytest", "-q", "--lf", "--disable-warnings"],
                            cwd=ROOT, capture_output=True, text=True)
     if rerun.returncode != 0:
-        tail = "\n".join(run.stdout.strip().splitlines()[-15:])
+        tail = "\n".join(rerun.stdout.strip().splitlines()[-15:])
         block(f"The test suite fails after your changes. Fix the code (not the tests) "
               f"and finish again.\n{tail}")
 print("test gate: " + run.stdout.strip().splitlines()[-1] if run.stdout.strip() else "")
