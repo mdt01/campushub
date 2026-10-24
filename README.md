@@ -64,6 +64,7 @@ labs/ch14/           scanner rules, security CI workflow, sandbox image, referen
 .github/workflows/agent-on-label.yml  issue-to-PR background agent - Chapter 15
 .github/ISSUE_TEMPLATE/agent-task.md  template for agent-ready issues - Chapter 15
 .agents/loops/        keep-ci-green goal loop and its check - Chapter 16
+labs/ch17/           LLM gateway configuration and AI-usage policy template - Chapter 17
 mcp_server/          MCP server for agents (list, search, register) - Chapter 7
 ```
 

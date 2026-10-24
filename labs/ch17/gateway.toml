@@ -1,0 +1,48 @@
+# minicode gateway configuration for Lab 17 (Chapter 17).
+#   python -m minicode.gateway --config labs/ch17/gateway.toml --port 8787
+# Clients then use:  LLM_BASE_URL=http://127.0.0.1:8787/v1  LLM_API_KEY=<a key below>
+#                    LLM_MODEL=auto  LLM_FEATURE=<feature name>
+# Prices are $ per million tokens. Replace them with your provider's current prices.
+
+[models.strong]                      # your best (and most expensive) model
+upstream = "https://api.openai.com/v1"
+model = "REPLACE-with-your-strong-model"
+key_env = "OPENAI_API_KEY"           # the real key stays in the gateway's environment
+price_in = 3.00
+price_out = 15.00
+
+[models.cheap]                       # a smaller, cheaper hosted model
+upstream = "https://api.openai.com/v1"
+model = "REPLACE-with-your-small-model"
+key_env = "OPENAI_API_KEY"
+price_in = 0.25
+price_out = 1.00
+
+[models.local]                       # optional: a free local model through Ollama
+upstream = "http://localhost:11434/v1"
+model = "qwen2.5-coder:7b"
+key_env = "OLLAMA_KEY"               # Ollama ignores the key; any value works
+price_in = 0.0
+price_out = 0.0
+
+[routes]                             # X-Task -> models to try, in order
+chat = ["strong", "cheap"]           # interactive work: quality first
+review = ["strong", "cheap"]         # minicode.review
+loop = ["cheap", "strong"]           # minicode.loop: cheap first, strong as fallback
+background = ["cheap", "strong"]     # minicode.background
+evaluate = ["local", "cheap"]        # experiments and evals: free first
+default = ["cheap", "strong"]
+
+[keys]                               # virtual keys handed to people -> team names
+"team-registrations-change-me" = "registrations"
+"team-events-change-me" = "events"
+"team-platform-change-me" = "platform"
+
+[budgets]                            # dollars per day
+registrations = 5.0
+events = 5.0
+platform = 10.0
+"feature:experiments" = 1.0          # a per-feature cap, matched on X-Feature
+
+[cache]
+tasks = ["evaluate"]                 # identical eval requests are answered from cache
