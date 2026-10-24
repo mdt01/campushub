@@ -1,0 +1,46 @@
+name: AI review
+
+# Advisory multi-agent review of every pull request (Chapter 13).
+# Needs a repository secret LLM_API_KEY and variables LLM_MODEL (and LLM_BASE_URL
+# if you do not use OpenAI). Without the secret the job is skipped, not failed.
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    env:
+      LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+      LLM_MODEL: ${{ vars.LLM_MODEL }}
+      LLM_BASE_URL: ${{ vars.LLM_BASE_URL || 'https://api.openai.com/v1' }}
+    steps:
+      - name: Skip without an API key
+        if: env.LLM_API_KEY == ''
+        run: echo "No LLM_API_KEY secret configured - skipping the AI review."
+      - uses: actions/checkout@v4
+        if: env.LLM_API_KEY != ''
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        if: env.LLM_API_KEY != ''
+        with:
+          python-version: "3.12"
+      - name: Install minicode
+        if: env.LLM_API_KEY != ''
+        run: |
+          git clone --depth 1 https://github.com/mdt01/minicode.git "$RUNNER_TEMP/minicode"
+          pip install -r "$RUNNER_TEMP/minicode/requirements.txt"
+      - name: Review the pull request
+        if: env.LLM_API_KEY != ''
+        run: |
+          PYTHONPATH="$RUNNER_TEMP/minicode" python -m minicode.review \
+            --base "origin/${{ github.base_ref }}" --markdown review.md --fail-on never
+      - name: Post the review as a comment
+        if: env.LLM_API_KEY != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr comment "${{ github.event.pull_request.number }}" --body-file review.md

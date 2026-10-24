@@ -1,0 +1,12 @@
+[
+  {"id": "B1", "file": "app/routers/events.py", "line": 23, "kind": "security",
+   "bug": "venue filter builds SQL with an f-string: SQL injection"},
+  {"id": "B2", "file": "app/routers/events.py", "line": 56, "kind": "correctness",
+   "bug": "missing event returns an error dict (fails response validation, 500) instead of 404"},
+  {"id": "B3", "file": "app/routers/events.py", "line": 57, "kind": "business rule",
+   "bug": "capacity can be set below the number of existing registrations"},
+  {"id": "B4", "file": "app/schemas.py", "line": 31, "kind": "validation",
+   "bug": "capacity accepts zero or negative numbers"},
+  {"id": "B5", "file": "app/services/registration_service.py", "line": 37, "kind": "correctness",
+   "bug": "cancel_registration ignores student_id and cancels another student's registration"}
+]

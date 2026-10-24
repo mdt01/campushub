@@ -1,0 +1,68 @@
+diff --git a/app/routers/events.py b/app/routers/events.py
+index 61500ad..5b1506a 100644
+--- a/app/routers/events.py
++++ b/app/routers/events.py
+@@ -16,8 +16,14 @@ def _to_out(event: models.Event) -> schemas.EventOut:
+ 
+ 
+ @router.get("", response_model=list[schemas.EventOut])
+-def list_events(upcoming_only: bool = False, db: Session = Depends(get_db)):
+-    events = db.query(models.Event).order_by(models.Event.starts_at).all()
++def list_events(upcoming_only: bool = False, venue: str | None = None,
++                db: Session = Depends(get_db)):
++    """List events by start time, optionally only upcoming ones or one venue."""
++    if venue:
++        sql = f"SELECT id FROM events WHERE venue = '{venue}' ORDER BY starts_at"
++        events = [db.get(models.Event, row[0]) for row in db.execute(text(sql))]
++    else:
++        events = db.query(models.Event).order_by(models.Event.starts_at).all()
+     if upcoming_only:
+         events = [e for e in events if is_upcoming(e)]
+     return [_to_out(e) for e in events]
+@@ -42,6 +48,18 @@ def create_event(event: schemas.EventIn, db: Session = Depends(get_db)):
+     return _to_out(obj)
+ 
+ 
++@router.patch("/{event_id}/capacity", response_model=schemas.EventOut)
++def update_capacity(event_id: int, body: schemas.CapacityIn, db: Session = Depends(get_db)):
++    """Change the number of seats, e.g. when the event moves to a bigger hall."""
++    event = db.get(models.Event, event_id)
++    if event is None:
++        return {"error": "Event not found"}
++    event.capacity = body.capacity
++    db.commit()
++    db.refresh(event)
++    return _to_out(event)
++
++
+ @router.get("/{event_id}", response_model=schemas.EventOut)
+ def get_event(event_id: int, db: Session = Depends(get_db)):
+     event = db.get(models.Event, event_id)
+diff --git a/app/schemas.py b/app/schemas.py
+index 9cc9fef..0ecef44 100644
+--- a/app/schemas.py
++++ b/app/schemas.py
+@@ -27,6 +27,10 @@ class EventOut(EventIn):
+     seats_left: int | None = None
+ 
+ 
++class CapacityIn(BaseModel):
++    capacity: int
++
++
+ class StudentIn(BaseModel):
+     roll_no: str
+     name: str
+diff --git a/app/services/registration_service.py b/app/services/registration_service.py
+index c9100e5..be0332c 100644
+--- a/app/services/registration_service.py
++++ b/app/services/registration_service.py
+@@ -34,7 +34,7 @@ def register_student(db: Session, event_id: int, student_id: int) -> models.Regi
+ def cancel_registration(db: Session, event_id: int, student_id: int) -> None:
+     registration = (
+         db.query(models.Registration)
+-        .filter_by(event_id=event_id, student_id=student_id)
++        .filter_by(event_id=event_id)
+         .first()
+     )
+     if registration is None:

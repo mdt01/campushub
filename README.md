@@ -56,6 +56,9 @@ labs/                code for the book's chapter labs (see labs/README.md)
 .agents/hooks.json   hooks (guard, post-edit check, stop-time test gate) - Chapter 10;
                      test guard against deleted or weakened tests - Chapter 12
 .agents/agents/      subagents: explorer, planner, reviewer - Chapter 10
+.agents/review-rules.md  team review rules for humans and AI reviewers - Chapter 13
+.github/workflows/ai-review.yml  advisory multi-agent PR review - Chapter 13
+labs/ch13/           seeded-bug branch patch for the review lab - Chapter 13
 mcp_server/          MCP server for agents (list, search, register) - Chapter 7
 ```
 
