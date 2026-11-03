@@ -8,7 +8,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ValidationError
 
-from labs.ch02.llm_client import default_model, make_client
+from labs.ch02.llm_client import chat, default_model, make_client
 
 
 class EventDraft(BaseModel):
@@ -18,6 +18,9 @@ class EventDraft(BaseModel):
     capacity: int
 
 
+# Strict JSON schemas must list every field as required and forbid extra fields.
+SCHEMA = {**EventDraft.model_json_schema(), "additionalProperties": False}
+
 SYSTEM = (
     "Extract a campus event from the user's text. Reply with JSON only, using the keys "
     "title, venue, starts_at (ISO 8601, assume year 2026) and capacity (integer)."
@@ -26,11 +29,16 @@ SYSTEM = (
 
 def extract(text: str) -> EventDraft:
     client = make_client()
-    response = client.chat.completions.create(
+    response = chat(
+        client,
         model=default_model(),
         messages=[{"role": "system", "content": SYSTEM}, {"role": "user", "content": text}],
         temperature=0,
-        response_format={"type": "json_object"},
+        # Ask for JSON that matches our schema; the provider constrains the output to it.
+        response_format={
+            "type": "json_schema",
+            "json_schema": {"name": "event_draft", "strict": True, "schema": SCHEMA},
+        },
     )
     raw = response.choices[0].message.content
     return EventDraft.model_validate(json.loads(raw))

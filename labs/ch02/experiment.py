@@ -13,7 +13,7 @@ import time
 from pathlib import Path
 
 from labs.ch02.cost import Price, estimate_cost
-from labs.ch02.llm_client import default_model, make_client
+from labs.ch02.llm_client import chat, default_model, make_client
 
 PROMPT = """Write a Python function `seats_left(capacity: int, registered: int) -> int`
 that returns how many seats are still free for a campus event.
@@ -28,7 +28,10 @@ PRICE = Price(
 
 def run_once(client, model: str, temperature: float) -> dict:
     start = time.perf_counter()
-    response = client.chat.completions.create(
+    notes: list[str] = []
+    response = chat(
+        client,
+        notes,
         model=model,
         messages=[{"role": "user", "content": PROMPT}],
         temperature=temperature,
@@ -39,7 +42,7 @@ def run_once(client, model: str, temperature: float) -> dict:
     answer = response.choices[0].message.content or ""
     return {
         "model": model,
-        "temperature": temperature,
+        "temperature": "default" if notes else temperature,
         "latency_s": round(latency, 2),
         "input_tokens": usage.prompt_tokens,
         "output_tokens": usage.completion_tokens,

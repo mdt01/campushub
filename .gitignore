@@ -188,3 +188,6 @@ cython_debug/
 
 # Local SQLite databases created by the app and tests (Chapter 18)
 *.db
+
+# Lab output
+labs/ch02/results.csv

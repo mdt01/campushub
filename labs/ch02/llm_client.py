@@ -5,7 +5,7 @@ Ollama server. Configure it with LLM_BASE_URL, LLM_API_KEY and LLM_MODEL.
 """
 import os
 
-from openai import OpenAI
+from openai import BadRequestError, OpenAI
 
 
 def make_client() -> OpenAI:
@@ -21,3 +21,20 @@ def default_model() -> str:
     if not model:
         raise SystemExit("Set LLM_MODEL to a model name offered by your provider.")
     return model
+
+
+def chat(client: OpenAI, notes: list[str] | None = None, **kwargs):
+    """client.chat.completions.create(), tolerant of models that fix their own sampling.
+
+    Some newer reasoning models reject `temperature` with HTTP 400. We then repeat the call
+    without it and record that in `notes`, so an experiment never silently mixes settings.
+    """
+    try:
+        return client.chat.completions.create(**kwargs)
+    except BadRequestError as exc:
+        if "temperature" in kwargs and "temperature" in str(exc):
+            kwargs.pop("temperature")
+            if notes is not None:
+                notes.append("temperature not supported by this model; provider default used")
+            return client.chat.completions.create(**kwargs)
+        raise
