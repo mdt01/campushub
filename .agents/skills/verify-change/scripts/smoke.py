@@ -37,11 +37,12 @@ events = r.json() if r.status_code == 200 else []
 check("GET /events returns events", r.status_code == 200 and len(events) > 0, r.text)
 check("events have seats_left", all("seats_left" in e for e in events))
 r = client.get("/events", params={"upcoming_only": True})
+upcoming = r.json() if r.status_code == 200 else []
 check("GET /events?upcoming_only=true", r.status_code == 200, r.text)
 r = client.get("/events/search", params={"q": "Open"})
 check("GET /events/search?q=Open", r.status_code == 200 and len(r.json()) > 0, r.text)
-if events:
-    eid = events[0]["id"]
+if upcoming:  # a future event: registration closes before an event starts (Chapter 12)
+    eid = upcoming[0]["id"]
     r = client.post(f"/events/{eid}/register", json={"student_id": 1})
     check("POST register student 1", r.status_code == 201, r.text)
     r = client.get(f"/events/{eid}/attendees")
