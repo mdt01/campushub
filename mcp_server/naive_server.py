@@ -5,12 +5,14 @@ arguments, raw JSON output and unhelpful errors. Your job in Lab 8 is to measure
 badly agents do with it, then refactor it into a few outcome-oriented tools.
 """
 import json
+import logging
 import os
 
 import httpx
 from mcp.server.mcpserver import MCPServer
 
 http = httpx.Client(base_url=os.getenv("CAMPUSHUB_URL", "http://127.0.0.1:8000"), timeout=10)
+logging.getLogger("httpx").setLevel(logging.WARNING)  # poor tools, but a quiet terminal
 mcp = MCPServer("campushub-naive")
 
 
