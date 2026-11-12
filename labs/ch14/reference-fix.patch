@@ -30,7 +30,7 @@ index 13e71cc..1ec2e4b 100644
 +# No default: admin features stay disabled unless a token is configured.
 +ADMIN_TOKEN = os.getenv("CAMPUSHUB_ADMIN_TOKEN")
 diff --git a/app/routers/events.py b/app/routers/events.py
-index 61500ad..0f7d3a5 100644
+index 61500ad..4c16186 100644
 --- a/app/routers/events.py
 +++ b/app/routers/events.py
 @@ -1,5 +1,4 @@
@@ -39,7 +39,7 @@ index 61500ad..0f7d3a5 100644
  from sqlalchemy.orm import Session
  
  from app import models, schemas
-@@ -25,10 +24,11 @@ def list_events(upcoming_only: bool = False, db: Session = Depends(get_db)):
+@@ -25,10 +24,12 @@ def list_events(upcoming_only: bool = False, db: Session = Depends(get_db)):
  
  @router.get("/search", response_model=list[schemas.EventOut])
  def search_events(q: str, db: Session = Depends(get_db)):
@@ -47,11 +47,30 @@ index 61500ad..0f7d3a5 100644
 -    sql = f"SELECT id FROM events WHERE title LIKE '%{q}%' ORDER BY starts_at"
 -    ids = [row[0] for row in db.execute(text(sql))]
 -    return [_to_out(db.get(models.Event, i)) for i in ids]
-+    # keyword search over titles; the ORM sends q as a bound parameter, never as SQL
++    # keyword search over titles; the ORM sends q as a bound parameter, never as SQL,
++    # and autoescape makes % and _ in q literal characters, not LIKE wildcards
 +    events = (db.query(models.Event)
-+              .filter(models.Event.title.contains(q))
++              .filter(models.Event.title.contains(q, autoescape=True))
 +              .order_by(models.Event.starts_at).all())
 +    return [_to_out(e) for e in events]
  
  
  @router.post("", response_model=schemas.EventOut, status_code=201)
+diff --git a/tests/test_events.py b/tests/test_events.py
+index 09936d4..2a10c6e 100644
+--- a/tests/test_events.py
++++ b/tests/test_events.py
+@@ -17,3 +17,13 @@ def test_list_events_sorted_by_start(client, club):
+ def test_search_events_by_keyword(client, event):
+     results = client.get("/events/search", params={"q": "Open"}).json()
+     assert [e["title"] for e in results] == ["Intro to Open Source"]
++
++
++def test_search_text_is_data_not_sql(client, club):
++    """Lab 14: a quote must not break the query, and % or _ must not match everything."""
++    for title in ("Workshop on Python", "Advanced Java Course"):
++        client.post("/events", json={"title": title, "venue": "Lab A",
++                                     "starts_at": "2030-02-01T10:00:00", "club_id": club["id"]})
++    for q in ("'", "x' OR '1'='1", "%", "_"):
++        response = client.get("/events/search", params={"q": q})
++        assert response.status_code == 200 and response.json() == [], q

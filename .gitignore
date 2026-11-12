@@ -197,3 +197,4 @@ labs/ch02/results.csv
 session.json
 .env.*
 !.env.example
+.venv-sec/
