@@ -12,5 +12,10 @@ still pass with the patch applied - which is the point.
 On Windows, if `git apply` reports whitespace errors, use
 `git apply --ignore-whitespace labs/ch13/seeded-bugs.patch`.
 
+Each bug in `seeded-bugs.json` lists keywords. A finding counts as a catch only if it is in
+the same file, within 10 lines, and mentions one of them: models often get line numbers
+wrong by a few lines, and a line window alone credits the wrong bug (found in Lab 13).
+Still triage the other findings by hand.
+
 Do not read `seeded-bugs.json` before you have reviewed the diff yourself (Step 1).
 Never merge this branch.
