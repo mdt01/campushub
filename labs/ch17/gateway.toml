@@ -18,6 +18,24 @@ key_env = "OPENAI_API_KEY"
 price_in = 0.25
 price_out = 1.00
 
+# Using Anthropic instead? Its OpenAI-compatible endpoint works the same way. Example (Lab 17
+# run, Nov 2026 prices - check your provider's current list; some models have tiered prices,
+# e.g. Haiku 5.5 costs more for prompts over 100k tokens, and the gateway has one price per model):
+#   [models.strong]
+#   upstream = "https://api.anthropic.com/v1/"
+#   model = "claude-sonnet-5-5"
+#   key_env = "ANTHROPIC_API_KEY"
+#   price_in = 2.00
+#   price_out = 10.00
+#   [models.cheap]
+#   upstream = "https://api.anthropic.com/v1/"
+#   model = "claude-haiku-5-5"
+#   key_env = "ANTHROPIC_API_KEY"
+#   price_in = 0.10
+#   price_out = 0.50
+# New accounts can have very low per-model rate limits: if every request to one model ends in a
+# fallback (the "fallbacks" column of the cost report), check that model's limit first.
+
 [models.local]                       # optional: a free local model through Ollama
 upstream = "http://localhost:11434/v1"
 model = "qwen2.5-coder:7b"

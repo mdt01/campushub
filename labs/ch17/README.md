@@ -15,5 +15,10 @@
     # afterwards:
     python -m minicode.cost_report gateway-log.jsonl --html cost.html
 
+Only the gateway process needs the real provider key (`key_env` names the variable). Hand out the
+virtual keys from `[keys]`: agents and scripts then never hold the real key. An exhausted budget is
+answered with HTTP 402 (`budget_exceeded`), and today's spending is rebuilt from the log when the
+gateway restarts.
+
 The minicode gateway is a teaching tool. For real teams, compare it with an
 open-source gateway such as LiteLLM's proxy server, or your cloud provider's gateway.
