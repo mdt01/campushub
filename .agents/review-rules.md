@@ -22,6 +22,8 @@ Each rule exists because we got it wrong once. Severity in brackets.
 - The naive datetimes used throughout `app/models.py` (a known, tracked decision).
 - Missing docstrings on small private helpers.
 - Suggestions to add new libraries or rewrite modules that the change did not touch.
+- Missing authentication on new endpoints: CampusHub has no auth layer yet (a tracked
+  decision; without this line AI reviewers flag every new route).
 
 ## Context
 - Owners: `app/services/` - registrations team; `app/routers/` - API team.
