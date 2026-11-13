@@ -17,6 +17,7 @@ out_of_scope = [
   "Making the one-hour window configurable.",
   "Any change outside app/services/ and tests/.",
 ]
+allowed_paths = ["app/services/", "tests/"]   # the last out-of-scope line, as a check
 verify = [
   "{python} -m pytest -q -p no:cacheprovider",
   "{python} .agents/checks/no_stray_files.py",

@@ -14,5 +14,10 @@ Stages: plan -> implement -> verify (tests, security scan of changed files, chec
 agent) -> publish (commit; --open-pr for a draft PR) -> preview (the app on a free port
 with a throw-away database, smoke checks over HTTP, log watcher).
 
-Write your own spec from specs/TEMPLATE.toml. Never merge a factory branch without
-reading it.
+The verify stage also fails a change that touches files outside the spec's `allowed_paths`,
+and its security scan reports only issues the change adds (an old issue in a touched file
+is shown as "left alone", not as a failure). Every failure writes a report with an Error line.
+
+Write your own spec from specs/TEMPLATE.toml; specs/events-venue-filter.toml is a second
+example (a safe GET /events?venue= filter, with failure-case smoke checks). Never merge a
+factory branch without reading it.

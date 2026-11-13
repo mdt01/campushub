@@ -8,6 +8,7 @@ acceptance = [
 out_of_scope = [
   "What must not change.",
 ]
+allowed_paths = ["app/", "tests/"]   # optional: changes outside these paths fail verify
 verify = [
   "{python} -m pytest -q -p no:cacheprovider",
   "{python} .agents/checks/no_stray_files.py",

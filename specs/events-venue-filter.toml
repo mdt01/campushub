@@ -1,0 +1,78 @@
+# A second example spec (Lab 18): a small feature with failure-case smoke checks.
+#   python -m minicode.factory run specs/events-venue-filter.toml --repo .
+title = "Filter the event list by venue, safely"
+goal = """Students can list only the events at one venue (GET /events?venue=Lab%201), so a
+department notice board can show what is on in its own rooms. The filter must be safe:
+the search endpoint next to it was built from SQL strings and was injectable (Lab 14)."""
+context = """GET /events is list_events in app/routers/events.py: it orders by starts_at and
+has an optional upcoming_only flag. Event.venue is String(200) in app/models.py. Do NOT
+copy the style of search_events in the same file: it builds SQL with an f-string."""
+acceptance = [
+  "GET /events?venue=Lab 1 returns only the events whose venue equals 'Lab 1', ignoring case ('lab 1' matches 'Lab 1'; 'Lab 10' and 'Main Lab 1' do not), still ordered by starts_at.",
+  "GET /events without venue returns every event exactly as before, and venue combines with upcoming_only.",
+  "The venue is matched literally with a SQLAlchemy expression, never a SQL string: venue values '%', '_' and \"' OR '1'='1\" return an empty list.",
+  "A venue longer than 200 characters is rejected with 422.",
+]
+out_of_scope = [
+  "search_events and its SQL (a separate fix).",
+  "Models, schemas, migrations and any other endpoint.",
+]
+allowed_paths = ["app/routers/events.py", "tests/"]
+verify = [
+  "{python} -m pytest -q -p no:cacheprovider",
+  "{python} .agents/checks/no_stray_files.py",
+]
+app = "app.main:app"
+health = "/health"
+env = { CAMPUSHUB_DB = "sqlite:///{tmp}/preview.db" }
+
+[[smoke]]
+name = "club"
+method = "POST"
+path = "/clubs"
+json = { name = "Venue Club", description = "smoke test" }
+expect_status = 201
+
+[[smoke]]
+name = "lab"
+method = "POST"
+path = "/events"
+json = { title = "Robotics demo", venue = "Lab 1", starts_at = "{now+2d}", capacity = 10, club_id = "{club.id}" }
+expect_status = 201
+
+[[smoke]]
+name = "hall"
+method = "POST"
+path = "/events"
+json = { title = "Debate", venue = "Hall 2", starts_at = "{now+3d}", capacity = 10, club_id = "{club.id}" }
+expect_status = 201
+
+[[smoke]]
+method = "GET"
+path = "/events?venue=lab%201"
+expect_status = 200
+expect_contains = "Robotics demo"
+
+[[smoke]]
+method = "GET"
+path = "/events?venue=Hall%202"
+expect_status = 200
+expect_contains = "Debate"
+
+# failure cases: wildcards and an injection attempt match nothing ("[]" only appears in an empty list)
+[[smoke]]
+method = "GET"
+path = "/events?venue=%25"
+expect_status = 200
+expect_contains = "[]"
+
+[[smoke]]
+method = "GET"
+path = "/events?venue=%27%20OR%20%271%27%3D%271"
+expect_status = 200
+expect_contains = "[]"
+
+[[smoke]]
+method = "GET"
+path = "/events?venue=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+expect_status = 422
